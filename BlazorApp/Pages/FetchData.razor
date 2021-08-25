@@ -1,11 +1,12 @@
 ﻿@page "/fetchdata"
+@using System.Text.Json.Serialization
 @inject HttpClient Http
 
-<h1>Weather forecast</h1>
+<h1>Crypto prices</h1>
 
 <p>This component demonstrates fetching data from the server.</p>
 
-@if (forecasts == null)
+@if (coins == null)
 {
     <p><em>Loading...</em></p>
 }
@@ -14,20 +15,18 @@ else
     <table class="table">
         <thead>
             <tr>
-                <th>Date</th>
-                <th>Temp. (C)</th>
-                <th>Temp. (F)</th>
-                <th>Summary</th>
+                <th>Symbol</th>
+                <th>Current Price</th>
+                
             </tr>
         </thead>
         <tbody>
-            @foreach (var forecast in forecasts)
+            @foreach (var coin in coins)
             {
                 <tr>
-                    <td>@forecast.Date.ToShortDateString()</td>
-                    <td>@forecast.TemperatureC</td>
-                    <td>@forecast.TemperatureF</td>
-                    <td>@forecast.Summary</td>
+                    <td>@coin.Symbol</td>
+                    <td>@coin.CurrentPrice</td>
+                  
                 </tr>
             }
         </tbody>
@@ -36,10 +35,12 @@ else
 
 @code {
     private WeatherForecast[] forecasts;
+    private Coin[] coins;
 
     protected override async Task OnInitializedAsync()
     {
-        forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("sample-data/weather.json");
+        // forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("sample-data/weather.json");
+            coins = await Http.GetFromJsonAsync<Coin[]>("https://cryptodatadotnet.azurewebsites.net/api/GetPricesJson");
     }
 
     public class WeatherForecast
@@ -51,5 +52,14 @@ else
         public string Summary { get; set; }
 
         public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+    }
+
+    public class Coin
+    {
+        [JsonPropertyName("symbol")]
+        public string Symbol { get; set;}
+
+        [JsonPropertyName("current_price")]
+        public double CurrentPrice {get; set;}
     }
 }
